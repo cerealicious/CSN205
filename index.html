@@ -275,7 +275,7 @@
       explanation: "The network command tells OSPF which of the router's interfaces should participate in the protocol and assigns them to a specific area. It doesn't assign addresses, define the RID, or set timers directly.<br><i>Reference: Ch. 20</i>"
     },
     {
-      question: "A packet arrives at a router with a destination IP address of 192.168.5.10. The routing table contains the following entries:<br>• O 192.168.5.0/24 [110/20] via 10.1.1.2<br>• S 192.168.0.0/16 [1/0] via 10.2.2.2<br>• C 10.1.1.0/24 is directly connected, Gi0/0 Which route will the router use to forward the packet?",
+      question: "A packet arrives at a router with a destination IP address of 192.168.5.10. The routing table contains the following entries:<br>• O 192.168.5.0/24 [110/20] via 10.1.1.2<br>• S 192.168.0.0/16 [1/0] via 10.2.2.2<br>• C 10.1.1.0/24 is directly connected, Gi0/0 <br>Which route will the router use to forward the packet?",
       options: ["The OSPF route (192.168.5.0/24)", "The Static route (192.168.0.0/16)", "The Connected route (10.1.1.0/24)", "None, it will be dropped"],
       answer: "The OSPF route (192.168.5.0/24)",
       explanation: "The Longest Prefix Match rule dictates that the most specific route is chosen. The /24 route is more specific than the /16 static route for the destination 192.168.5.10. The connected route doesn't match the destination. Therefore, the OSPF /24 route is used.<br><i>Reference: Ch. 16</i>"
