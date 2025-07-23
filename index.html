@@ -78,7 +78,7 @@
       cursor: pointer;
       transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
     }
-    .options input[type="radio"] {
+    .options input[type="radio"], .options input[type="checkbox"] {
       margin-right: 10px;
       accent-color: #007bff;
     }
@@ -181,17 +181,20 @@
     .pass { color: #28a745; font-weight: bold; }
     .fail { color: #dc3545; font-weight: bold; }
   </style>
+  <!-- Google Fonts - Inter -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
+<!-- Welcome Page -->
 <div id="welcome-page">
   <h1>Welcome to Router & OSPF Practice Test</h1>
-  <p>This test will help you prepare for the Quiz 2.</p>
+  <p>This test will help you prepare for Quiz 2.</p>
   <p>You will have <strong>60 minutes</strong> to complete <strong>45 questions</strong>.</p>
   <button id="start-button" class="action-button">START</button>
 </div>
 
+<!-- Timer -->
 <div id="timer-container">
   <div id="timer-display">60:00</div>
   <div id="progress-bar-container">
@@ -207,6 +210,7 @@
   <button id="submit-test-button" class="action-button">Submit Test</button>
 </div>
 
+<!-- Results Modal -->
 <div id="results-overlay">
   <div id="results-box">
     <h3>Test Results</h3>
@@ -222,15 +226,17 @@
   var timeLeft = 60 * 60; // 60 minutes in seconds
   var timerInterval;
   var passingPercentage = 0.65; // 65% passing requirement
-  
+  var totalQuizTime = 60 * 60; // Total time for progress bar calculation
+
   // --- Original Questions (from Question1.txt with corrected answers as full text) ---
   const originalQuestions = [
     // Section A: Multiple Choice Questions (30 Questions)
     {
       question: "Which two steps occur on a router when it receives an IP packet? (Choose two.)",
       options: ["Checks the destination MAC address against its MAC address table.", "De-encapsulates the packet from the Data Link Layer frame.", "Matches the destination IP address against its routing table.", "Assigns a new Layer 4 port number."],
-      answer: "De-encapsulates the packet from the Data Link Layer frame.", 
-      explanation: "Routers de-encapsulate packets and use their routing table to determine where to send them. MAC address checking is done by switches. Assigning Layer 4 ports is typically a host or server function.<br><i>Reference: Ch. 16, Ch. 17</i>"
+      answer: ["De-encapsulates the packet from the Data Link Layer frame.", "Matches the destination IP address against its routing table."], // Now an array for multi-select
+      explanation: "This is a 'Choose two' question. The correct steps are: 1. De-encapsulates the packet from the Data Link Layer frame. 2. Matches the destination IP address against its routing table. Routers de-encapsulate packets and use their routing table to determine where to send them. MAC address checking is done by switches. Assigning Layer 4 ports is typically a host or server function.<br><i>Reference: Ch. 16, Ch. 17</i>",
+      multiSelect: true // Mark as multi-select
     },
     {
       question: "What is the primary purpose of a routing protocol like OSPF?",
@@ -260,10 +266,10 @@
       question: "What is the default administrative distance for an OSPF internal route?",
       options: ["1", "90", "110", "120"],
       answer: "110",
-      explanation: "The default administrative distance for OSPF internal routes is 110. Connected routes are 0, EIGRP is 90, and RIP is 120.<br><i>Reference: Ch. 19</i>"
+      explanation: "The default administrative distance for OSPF internal routes is 110. Connected routes are 0, EIGRP is 90, and RIP is 120.<br><i>Reference: Ch. 19, Chapter 16-20.pdf</i>"
     },
     {
-      question: "Refer to the topology: R1 (RID 1.1.1.1) and R2 (RID 2.2.2.2) are connected via a FastEthernet link. R1's Fa0/0 has IP 192.168.10.1/24, and R2's Fa0/0 has 192.168.10.2/24. Which command on R1 would correctly start the OSPF process and assign it a process ID of 100?",
+      question: "Refer to the topology:<br>R1 (RID 1.1.1.1) and R2 (RID 2.2.2.2) are connected via a FastEthernet link.<br>R1's Fa0/0 has IP 192.168.10.1/24, and R2's Fa0/0 has 192.168.10.2/24.<br>Which command on R1 would correctly start the OSPF process and assign it a process ID of 100?",
       options: ["router ospf 100", "router ospf", "enable ospf 100", "ip ospf 100 area 0"],
       answer: "router ospf 100",
       explanation: "The command to initiate the OSPF process configuration mode is router ospf process-id.<br><i>Reference: Ch. 20</i>"
@@ -278,7 +284,7 @@
       question: "A packet arrives at a router with a destination IP address of 192.168.5.10. The routing table contains the following entries:<br>• O 192.168.5.0/24 [110/20] via 10.1.1.2<br>• S 192.168.0.0/16 [1/0] via 10.2.2.2<br>• C 10.1.1.0/24 is directly connected, Gi0/0 <br>Which route will the router use to forward the packet?",
       options: ["The OSPF route (192.168.5.0/24)", "The Static route (192.168.0.0/16)", "The Connected route (10.1.1.0/24)", "None, it will be dropped"],
       answer: "The OSPF route (192.168.5.0/24)",
-      explanation: "The Longest Prefix Match rule dictates that the most specific route is chosen. The /24 route is more specific than the /16 static route for the destination 192.168.5.10. The connected route doesn't match the destination. Therefore, the OSPF /24 route is used.<br><i>Reference: Ch. 16</i>"
+      explanation: "The Longest Prefix Match rule dictates that the most specific route is chosen. The /24 route is more specific than the /16 static route for the destination 192.168.5.10. The connected route doesn't match the destination. Therefore, the OSPF /24 route is used.<br><i>Reference: Ch. 16, Chapter 16-20.pdf</i>"
     },
     {
       question: "Which OSPF LSA type is flooded only within a single area and describes the links of a router?",
@@ -314,7 +320,7 @@
       question: "A router needs to send a packet to the network 172.16.0.0/16. Its routing table contains the following routes:<br>• S 172.16.0.0/16 [1/0] via 10.1.1.1<br>• O 172.16.0.0/24 [110/15] via 10.2.2.2<br>• S* 0.0.0.0/0 [1/0] via 10.3.3.3 <br>Which route will be used?",
       options: ["The Static route (172.16.0.0/16)", "The OSPF route (172.16.0.0/24)", "The Default route (0.0.0.0/0)", "It depends on the packet's source address."],
       answer: "The Static route (172.16.0.0/16)",
-      explanation: "Again, the Longest Prefix Match applies. The static route for 172.16.0.0/16 is more specific than the OSPF summary route for 172.16.0.0/24 and is therefore preferred over both the /24 route and the default route for any destination within the 172.16.0.0/16 range.<br><i>Reference: Ch. 16</i>"
+      explanation: "Again, the Longest Prefix Match applies. The static route for 172.16.0.0/16 is more specific than the OSPF summary route for 172.16.0.0/24 and is therefore preferred over both the /24 route and the default route for any destination within the 172.16.0.0/16 range.<br><i>Reference: Ch. 16, Chapter 16-20.pdf</i>"
     },
     {
       question: "What is the default OSPF network type for an Ethernet interface?",
@@ -386,7 +392,7 @@
       question: "Which command directly modifies the calculated OSPF cost of an interface?",
       options: ["bandwidth kilobits", "ip ospf cost value", "clock rate", "speed Mbps"],
       answer: "ip ospf cost value",
-      explanation: "The interface subcommand ip ospf cost <value> directly sets the OSPF cost for that specific interface, overriding the default calculation based on bandwidth. Changing bandwidth affects the calculated cost. clock rate and speed relate to physical layer settings, not the OSPF metric directly.<br><i>Reference: Ch. 20</i>"
+      explanation: "The interface subcommand ip ospf cost <value> directly sets the OSPF cost for that specific interface, overriding the value calculated by the auto-cost reference-bandwidth and interface bandwidth settings.<br><i>Reference: Ch. 20</i>"
     },
     {
       question: "What does the 'L' code signify in the show ip route output legend?",
@@ -398,7 +404,7 @@
       question: "Which of the following is NOT a characteristic used by routers to make a forwarding decision based on the routing table?",
       options: ["Prefix (Subnet ID)", "Network Mask", "Next Hop", "Source MAC Address"],
       answer: "Source MAC Address",
-      explanation: "Routers make Layer 3 forwarding decisions based on the destination IP address and information in their routing table, specifically the Prefix, Mask, and Next Hop. The Source MAC Address is relevant for Layer 2 switching but not for the router's IP routing decision.<br><i>Reference: Ch. 16</i>"
+      explanation: "Routers make Layer 3 forwarding decisions based on the destination IP address and information in their routing table, specifically the Prefix, Mask, and Next Hop. The Source MAC Address is relevant for Layer 2 switching but not for the router's IP routing decision.<br><i>Reference: Ch. 16, Chapter 16-20.pdf</i>"
     },
     {
       question: "An OSPF router receives two paths to the same destination network: Path A with a total cost of 50 and Path B with a total cost of 50. What will OSPF do?",
@@ -409,91 +415,91 @@
 
     // Section B: True/False Questions (15 Questions)
     {
-      question: "T/F: A router makes its forwarding decision based primarily on the destination MAC address found in the incoming frame header.",
+      question: "A router makes its forwarding decision based primarily on the destination MAC address found in the incoming frame header.",
       options: ["True", "False"],
       answer: "False",
       explanation: "FALSE. Routers make forwarding decisions based on the destination IP address in the packet header (Layer 3), consulting their routing table. Switches use the destination MAC address (Layer 2) for forwarding.<br><i>Reference: Ch. 16</i>"
     },
     {
-      question: "T/F: Static routes must always be manually reconfigured if the network topology changes.",
+      question: "Static routes must always be manually reconfigured if the network topology changes.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. Static routes are manually configured and do not automatically adapt to network changes. If a link fails, the static route remains in the table potentially causing black holes unless manually removed or adjusted.<br><i>Reference: Ch. 16</i>"
     },
     {
-      question: "T/F: The OSPF Router ID must always be configured manually; it cannot be chosen automatically.",
+      question: "The OSPF Router ID must always be configured manually; it cannot be chosen automatically.",
       options: ["True", "False"],
       answer: "False",
       explanation: "FALSE. While the router-id command allows manual configuration, OSPF can automatically select a Router ID based on the highest active loopback IP, or if none, the highest active physical interface IP.<br><i>Reference: Ch. 20</i>"
     },
     {
-      question: "T/F: In a single-area OSPF network, all routers have identical Link-State Databases (LSDBs).",
+      question: "In a single-area OSPF network, all routers have identical Link-State Databases (LSDBs).",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. In a correctly functioning single-area OSPF network, all routers within that area maintain identical LSDBs, as they flood all Link-State Advertisements to each other.<br><i>Reference: Ch. 20</i>"
     },
     {
-      question: "T/F: The network command in OSPF is used to advertise external routes into the OSPF domain.",
+      question: "The network command in OSPF is used to advertise external routes into the OSPF domain.",
       options: ["True", "False"],
       answer: "False",
       explanation: "FALSE. The network command tells OSPF which local interfaces should participate in OSPF and belong to which area. Advertising external routes typically involves redistribution commands or specific features like default-information originate.<br><i>Reference: Ch. 20</i>"
     },
     {
-      question: "T/F: OSPF uses the Dijkstra Shortest Path First (SPF) algorithm to calculate the best paths.",
+      question: "OSPF uses the Dijkstra Shortest Path First (SPF) algorithm to calculate the best paths.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. OSPF uses the Dijkstra algorithm, also known as Shortest Path First (SPF), to calculate the shortest path tree from the router's perspective based on the LSDB.<br><i>Reference: Ch. 19</i>"
     },
     {
-      question: "T/F: The Administrative Distance is used by a router to select the best path among routes learned from the same routing protocol .",
+      question: "The Administrative Distance is used by a router to select the best path among routes learned from the same routing protocol .",
       options: ["True", "False"],
       answer: "False",
       explanation: "FALSE. Administrative Distance (AD) is used to select the best path among routes learned from different routing protocols (e.g., choosing OSPF over RIP). The Metric is used to select the best path within the same routing protocol (e.g., choosing the lower cost OSPF path).<br><i>Reference: Chapter 16-20.pdf</i>"
     },
     {
-      question: "T/F: A Type 5 LSA in OSPF describes routes external to the OSPF autonomous system.",
+      question: "A Type 5 LSA in OSPF describes routes external to the OSPF autonomous system.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. Type 5 LSAs (AS External LSAs) are generated by ASBRs to describe routes that originate from outside the OSPF autonomous system.<br><i>Reference: Ch. 19</i>"
     },
     {
-      question: "T/F: OSPF Hello packets are sent using the multicast address 224.0.0.5.",
+      question: "OSPF Hello packets are sent using the multicast address 224.0.0.5.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. OSPF Hello packets are multicast to the address 224.0.0.5, which is the \"All OSPF Routers\" multicast address.<br><i>Reference: Ch. 19</i>"
     },
     {
-      question: "T/F: The \"Gateway of last resort\" in the show ip route output refers to the default route.",
+      question: "The \"Gateway of last resort\" in the show ip route output refers to the default route.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. The \"Gateway of last resort\" line in the show ip route output explicitly points to the default route (0.0.0.0/0) used when no other specific route matches the destination.<br><i>Reference: Chapter 16-20.pdf</i>"
     },
     {
-      question: "T/F: OSPF calculates the cost of an interface inversely proportional to its bandwidth; faster interfaces have lower costs.",
+      question: "OSPF calculates the cost of an interface inversely proportional to its bandwidth; faster interfaces have lower costs.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. OSPF's cost calculation (Cost = Reference_BW / Interface_BW) means that as bandwidth increases, the calculated cost decreases. This makes faster links more preferable in the routing path.<br><i>Reference: Ch. 20</i>"
     },
     {
-      question: "T/F: In OSPF, a router can be both an ABR and an ASBR simultaneously.",
+      question: "In OSPF, a router can be both an ABR and an ASBR simultaneously.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. A router can simultaneously connect to multiple OSPF areas (making it an ABR) and also have a connection to an external network (making it an ASBR).<br><i>Reference: Ch. 19</i>"
     },
     {
-      question: "T/F: The ip ospf cost command overrides the default OSPF cost calculation based on bandwidth.",
+      question: "The ip ospf cost command overrides the default OSPF cost calculation based on bandwidth.",
       options: ["True", "False"],
       answer: "True",
       explanation: "TRUE. The ip ospf cost <value> interface command directly sets the cost for that interface, overriding the value calculated by the auto-cost reference-bandwidth and interface bandwidth settings.<br><i>Reference: Ch. 20</i>"
     },
     {
-      question: "T/F: The wildcard mask 0.0.0.0 used with the OSPF network command means 'ignore all bits' when matching interfaces.",
+      question: "The wildcard mask 0.0.0.0 used with the OSPF network command means 'ignore all bits' when matching interfaces.",
       options: ["True", "False"],
       answer: "False",
       explanation: "FALSE. The wildcard mask 0.0.0.0 means \"compare all bits\" or \"exact match\". It requires the network address specified in the network command to match the interface IP address exactly.<br><i>Reference: Ch. 20</i>"
     },
     {
-      question: "T/F: OSPF is classified as an Exterior Gateway Protocol (EGP).",
+      question: "OSPF is classified as an Exterior Gateway Protocol (EGP).",
       options: ["True", "False"],
       answer: "False",
       explanation: "FALSE. OSPF is an Interior Gateway Protocol (IGP), used within a single autonomous system. Exterior Gateway Protocols (EGPs) like BGP are used for routing between different autonomous systems.<br><i>Reference: Ch. 19</i>"
@@ -520,26 +526,32 @@
 
     // This section prepares the 'questions' array by filtering and shuffling.
     // It's called once when the quiz starts (via startButton click).
-    var mc = originalQuestions.filter(function(q) { return q.options.length > 2; });
-    var tf = originalQuestions.filter(function(q) { return q.options.length === 2 && (q.options.includes("True") || q.options.includes("False")); });
+    var mc = originalQuestions.filter(function(q) { return !q.multiSelect && q.options.length > 2; }); // Filter for single-select MC
+    var tf = originalQuestions.filter(function(q) { return !q.multiSelect && q.options.length === 2 && (q.options.includes("True") || q.options.includes("False")); }); // Filter for T/F
+    var multiSelectQuestions = originalQuestions.filter(function(q) { return q.multiSelect; }); // Filter for multi-select questions
     
     // Shuffle each group independently
     var shuffledMc = shuffleArray(mc);
     var shuffledTf = shuffleArray(tf);
+    var shuffledMultiSelect = shuffleArray(multiSelectQuestions); // Shuffle multi-select questions
 
     // Combine the shuffled groups to form the final 'questions' array
-    questions = [...shuffledMc, ...shuffledTf];
+    // You can adjust the order of these groups if you prefer (e.g., all multi-select first)
+    questions = [...shuffledMultiSelect, ...shuffledMc, ...shuffledTf]; // Multi-select first, then MC, then T/F
 
     // Shuffle options for each question, but skip for True/False questions
     questions.forEach(function(q) {
-      var isTrueFalseQuestion = q.options.length === 2 &&
-                                ((q.options[0] === "True" && q.options[1] === "False") ||
-                                 (q.options[0] === "False" && q.options[1] === "True"));
+      if (!q.multiSelect) { // Only shuffle options for single-select questions
+        var isTrueFalseQuestion = q.options.length === 2 &&
+                                  ((q.options[0] === "True" && q.options[1] === "False") ||
+                                   (q.options[0] === "False" && q.options[1] === "True"));
 
-      if (!isTrueFalseQuestion) {
-        // Only shuffle options that are NOT True/False
-        q.options = shuffleArray(q.options); 
+        if (!isTrueFalseQuestion) {
+          q.options = shuffleArray(q.options); 
+        }
       }
+      // Multi-select options are not shuffled here as their order might be important in the question text
+      // and the comparison logic handles unordered selection.
     });
 
 
@@ -555,12 +567,21 @@
 
       q.options.forEach(function(option) {
         var label = document.createElement('label');
-        var radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'question' + index;
-        radio.value = option;
-        radio.addEventListener('change', function() { checkAnswer(index, option); });
-        label.appendChild(radio);
+        var inputElement = document.createElement('input'); // Use a generic name
+        
+        if (q.multiSelect) {
+            inputElement.type = 'checkbox';
+            inputElement.name = 'question_checkbox_' + index; // Unique name for each checkbox group
+            inputElement.value = option;
+            inputElement.addEventListener('change', function() { checkMultiAnswer(index); }); // Call multi-answer check
+        } else {
+            inputElement.type = 'radio';
+            inputElement.name = 'question' + index; // Common name for radio group
+            inputElement.value = option;
+            inputElement.addEventListener('change', function() { checkAnswer(index, option); }); // Call single-answer check
+        }
+
+        label.appendChild(inputElement);
         label.appendChild(document.createTextNode(option));
         optionsDiv.appendChild(label);
       });
@@ -575,14 +596,15 @@
       explanationDiv.classList.add('explanation');
       explanationDiv.id = 'explanation-' + index;
       explanationDiv.style.display = 'none';
-      // Ensure explanation includes reference as plain text initially, will be formatted by JS
-      explanationDiv.innerHTML = '<strong>Correct Answer:</strong> ' + q.answer + '<br>' + q.explanation;
+      // Explanation content
+      explanationDiv.innerHTML = '<strong>Correct Answer:</strong> ' + (Array.isArray(q.answer) ? q.answer.join(' AND ') : q.answer) + '<br>' + q.explanation;
       questionDiv.appendChild(explanationDiv);
       
       quizContainer.appendChild(questionDiv);
     });
   }
 
+  // Function to check single-select answers (radio buttons)
   function checkAnswer(questionIndex, selectedOption) {
     var question = questions[questionIndex];
     var questionDiv = document.querySelectorAll('.question')[questionIndex]; 
@@ -598,8 +620,8 @@
     optionsLabels.forEach(function(label) {
         var optionText = label.textContent.trim();
         if (optionText === selectedOption) {
-            label.style.backgroundColor = selectedOption === question.answer ? '#d4edda' : '#ffe6e6'; // Light green for correct, light red for incorrect
-            label.style.borderColor = selectedOption === question.answer ? '#28a745' : '#dc3545'; // Darker border for correct, darker red for incorrect
+            label.style.backgroundColor = selectedOption === question.answer ? '#e6ffe6' : '#ffe6e6'; // Light green for correct, light red for incorrect
+            label.style.borderColor = selectedOption === question.answer ? '#66cc66' : '#dc3545'; // Darker border for correct, darker red for incorrect
         }
         // Also highlight the correct answer if a wrong one was chosen
         if (optionText === question.answer && selectedOption !== question.answer) {
@@ -620,6 +642,74 @@
 
     explanationDiv.style.display = 'block'; // Ensure explanation is always shown on click
   }
+
+  // Function to check multi-select answers (checkboxes)
+  function checkMultiAnswer(questionIndex) {
+    var question = questions[questionIndex];
+    var checkboxes = document.getElementsByName('question_checkbox_' + questionIndex);
+    var selectedValues = [];
+    checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            selectedValues.push(checkbox.value);
+        }
+    });
+
+    var feedbackDiv = document.getElementById('feedback-' + questionIndex);
+    var explanationDiv = document.getElementById('explanation-' + questionIndex);
+    var optionsLabels = document.querySelectorAll('.question')[questionIndex].querySelectorAll('label');
+
+    // Only provide feedback if the correct number of options are selected
+    if (selectedValues.length === question.answer.length) {
+        // Sort both arrays to compare them reliably (order doesn't matter for checkboxes)
+        var sortedSelected = selectedValues.slice().sort();
+        var sortedCorrect = question.answer.slice().sort();
+
+        var isCorrect = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+
+        if (isCorrect) {
+            feedbackDiv.textContent = "Correct!";
+            feedbackDiv.classList.remove('incorrect');
+            feedbackDiv.classList.add('correct');
+            // Disable all checkboxes for this question once correct
+            checkboxes.forEach(function(checkbox) { checkbox.disabled = true; });
+            optionsLabels.forEach(function(label) {
+                label.style.backgroundColor = '#e6ffe6'; // Light green for correct
+                label.style.borderColor = '#66cc66';
+            });
+        } else {
+            feedbackDiv.textContent = "Incorrect.";
+            feedbackDiv.classList.remove('correct');
+            feedbackDiv.classList.add('incorrect');
+            // Do not disable checkboxes immediately, allow user to try again
+            // Highlight selected incorrect ones, and correct ones
+            optionsLabels.forEach(function(label) {
+                var optionText = label.textContent.trim();
+                if (selectedValues.includes(optionText)) { // If it was selected
+                    if (!question.answer.includes(optionText)) { // And it's wrong
+                        label.style.backgroundColor = '#ffe6e6'; // Light red
+                        label.style.borderColor = '#ff6666';
+                    }
+                }
+                if (question.answer.includes(optionText)) { // Always highlight correct answers
+                    label.style.backgroundColor = '#d4edda'; // Neutral green
+                    label.style.borderColor = '#28a745';
+                }
+            });
+        }
+        explanationDiv.style.display = 'block'; // Show explanation after attempt
+    } else {
+        // If not enough (or too many) selected, clear feedback and hide explanation
+        feedbackDiv.textContent = "";
+        feedbackDiv.classList.remove('correct', 'incorrect');
+        explanationDiv.style.display = 'none';
+        // Reset colors if user deselects
+        optionsLabels.forEach(function(label) {
+            label.style.backgroundColor = '#f0f5f8';
+            label.style.borderColor = '#d3e0ea';
+        });
+    }
+  }
+
 
   // Timer functions
   function formatTime(seconds) {
@@ -667,20 +757,43 @@
     var totalQuestions = questions.length; // Get total questions from the 'questions' array
 
     questions.forEach(function(q, index) {
-      var radios = document.getElementsByName('question' + index);
-      var selectedValue = null;
-      radios.forEach(function(radio) {
-        radio.disabled = true; // Disable all options on submit
-        if (radio.checked) {
-          selectedValue = radio.value;
-        }
-      });
+      var selectedValue = null; // For radio buttons
+      var selectedMultiValues = []; // For checkboxes
+
+      if (q.multiSelect) {
+          var checkboxes = document.getElementsByName('question_checkbox_' + index);
+          checkboxes.forEach(function(checkbox) {
+              checkbox.disabled = true; // Disable all options on submit
+              if (checkbox.checked) {
+                  selectedMultiValues.push(checkbox.value);
+              }
+          });
+      } else {
+          var radios = document.getElementsByName('question' + index);
+          radios.forEach(function(radio) {
+              radio.disabled = true; // Disable all options on submit
+              if (radio.checked) {
+                  selectedValue = radio.value;
+              }
+          });
+      }
 
       // Show feedback and explanation for all questions
       var feedbackDiv = document.getElementById('feedback-' + index);
       var explanationDiv = document.getElementById('explanation-' + index);
 
-      if (selectedValue === q.answer) {
+      var isCorrect = false;
+      if (q.multiSelect) {
+          // Compare sorted arrays for multi-select
+          var sortedSelected = selectedMultiValues.slice().sort();
+          var sortedCorrect = q.answer.slice().sort();
+          isCorrect = JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+      } else {
+          // Compare single value for radio buttons
+          isCorrect = (selectedValue === q.answer);
+      }
+
+      if (isCorrect) {
         score++;
         feedbackDiv.textContent = "Correct!";
         feedbackDiv.classList.remove('incorrect');
@@ -691,7 +804,6 @@
         feedbackDiv.classList.add('incorrect');
       }
       // Ensure explanation is always shown on submit, and includes full correct answer text
-      explanationDiv.innerHTML = '<strong>Correct Answer:</strong> ' + q.answer + '<br>' + q.explanation;
       explanationDiv.style.display = 'block'; 
     });
 
@@ -737,23 +849,28 @@
 
     // Filter and shuffle questions once when the DOM is ready,
     // so 'questions' is populated before any click events rely on it.
-    var mc = originalQuestions.filter(function(q) { return q.options.length > 2; });
-    var tf = originalQuestions.filter(function(q) { return q.options.length === 2 && (q.options.includes("True") || q.options.includes("False")); });
+    var mc = originalQuestions.filter(function(q) { return !q.multiSelect && q.options.length > 2; });
+    var tf = originalQuestions.filter(function(q) { return !q.multiSelect && q.options.length === 2 && (q.options.includes("True") || q.options.includes("False")); });
+    var multiSelectQuestions = originalQuestions.filter(function(q) { return q.multiSelect; });
     
     // Shuffle each group independently
     var shuffledMc = shuffleArray(mc);
     var shuffledTf = shuffleArray(tf);
+    var shuffledMultiSelect = shuffleArray(multiSelectQuestions);
 
     // Combine the shuffled groups to form the final 'questions' array
-    questions = [...shuffledMc, ...shuffledTf];
+    // Multi-select questions are placed first in the combined array
+    questions = [...shuffledMultiSelect, ...shuffledMc, ...shuffledTf];
 
-    // Shuffle options for each question (except T/F)
+    // Shuffle options for single-select questions
     questions.forEach(function(q) {
-        var isTrueFalseQuestion = q.options.length === 2 &&
-                                  ((q.options[0] === "True" && q.options[1] === "False") ||
-                                   (q.options[0] === "False" && q.options[1] === "True"));
-        if (!isTrueFalseQuestion) {
-            q.options = shuffleArray(q.options);
+        if (!q.multiSelect) { 
+            var isTrueFalseQuestion = q.options.length === 2 &&
+                                      ((q.options[0] === "True" && q.options[1] === "False") ||
+                                       (q.options[0] === "False" && q.options[1] === "True"));
+            if (!isTrueFalseQuestion) {
+                q.options = shuffleArray(q.options);
+            }
         }
     });
 
