@@ -311,7 +311,7 @@
       explanation: "On multi-access networks like Ethernet, the DR/BDR mechanism reduces the number of full OSPF adjacencies required. Instead of every router forming an adjacency with every other router, routers only form full adjacencies with the DR and BDR. The DR is not a default gateway, does not authenticate packets, and OSPF itself prevents loops via its algorithm.<br><i>Reference: Ch. 19</i>"
     },
     {
-      question: "A router needs to send a packet to the network 172.16.0.0/16. Its routing table contains the following routes:<br>• S 172.16.0.0/16 [1/0] via 10.1.1.1<br>• O 172.16.0.0/24 [110/15] via 10.2.2.2<br>• S* 0.0.0.0/0 [1/0] via 10.3.3.3 Which route will be used?",
+      question: "A router needs to send a packet to the network 172.16.0.0/16. Its routing table contains the following routes:<br>• S 172.16.0.0/16 [1/0] via 10.1.1.1<br>• O 172.16.0.0/24 [110/15] via 10.2.2.2<br>• S* 0.0.0.0/0 [1/0] via 10.3.3.3 <br>Which route will be used?",
       options: ["The Static route (172.16.0.0/16)", "The OSPF route (172.16.0.0/24)", "The Default route (0.0.0.0/0)", "It depends on the packet's source address."],
       answer: "The Static route (172.16.0.0/16)",
       explanation: "Again, the Longest Prefix Match applies. The static route for 172.16.0.0/16 is more specific than the OSPF summary route for 172.16.0.0/24 and is therefore preferred over both the /24 route and the default route for any destination within the 172.16.0.0/16 range.<br><i>Reference: Ch. 16</i>"
