@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSN 205 Finals Practice Questions</title>
+    <!-- Tailwind CSS CDN for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+   <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .correct-answer {
+            background-color: #d1fae5 !important;
+            border-color: #34d399 !important;
+        }
+        .wrong-answer {
+            background-color: #fee2e2 !important;
+            border-color: #f87171 !important;
+        }
+        .selected-choice {
+            background-color: #dbeafe !important;
+            border-color: #60a5fa !important;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Quiz Container -->
+    <div class="container mx-auto p-4 bg-white rounded-lg shadow-lg max-w-3xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h1 class="text-base font-bold text-gray-800">CSN205 Practice Test - Final</h1>
+            <div class="text-l font-bold text-gray-700">Score: <span id="score">0</span></div>
+        </div>
+
+        <!-- Question Section -->
+        <div id="quiz-container">
+            <!-- Questions will be loaded here -->
+        </div>
+
+        <!-- Explanation Section -->
+        <div id="explanation-container" class="mt-8 pt-4 border-t hidden">
+            <h2 class="text-base font-semibold text-gray-800 mb-2">Explanation</h3>
+            <p id="explanation-text" class="text-lg text-gray-700"></p>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between mt-8">
+            <button id="prev-button" class="px-5 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+            </button>
+            <button id="next-button" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Next
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Quiz data with all the provided questions, choices, answers, and explanations.
+            const quizData = [
+                {
+                    question: "Which of the following network commands, following the command router ospf 1, tells this router to start using OSPF on interfaces whose IP addresses are 10.1.1.1, 10.1.100.1, and 10.1.120.1?",
+                    choices: ["network 10.0.0.0 255.0.0.0 area 0", "network 10.0.0.0 0.255.255.255 area 0", "network 10.0.0.1 0.0.0.255 area 0", "network 10.0.0.1 0.0.255.255 area 0", "network 10.1.0.0 0.0.255.255 area 0"],
+                    correct: ["network 10.1.0.0 0.0.255.255 area 0"],
+                    explanation: "The network 10.1.0.0 0.0.255.255 area 0 command matches all IP addresses that begin with 10.1, enabling OSPF in area 0 on all interfaces. The answer with wildcard mask 0.255.255.0 is illegal because it represents more than one string of binary 0s separated by binary 1s. The answer with x’s is syntactically incorrect. The answer with wildcard mask 255.0.0.0 means “Match all addresses whose last three octets are 0.0.0,” so none of the three interfaces are matched."
+                },
+                {
+                    question: "Which of the following commands list the OSPF neighbors off interface serial 0/0? (Choose two answers.)",
+                    choices: ["show ip ospf neighbor", "show ip ospf interface brief", "show ip neighbor", "show ip interface", "show ip ospf neighbor serial 0/0"],
+                    correct: ["show ip ospf neighbor", "show ip ospf neighbor serial 0/0"],
+                    explanation: "Of the three wrong answers, two are real commands that simply do not list the OSPF neighbors. show ip ospf interface brief lists interfaces on which OSPF is enabled but does not list neighbors. show ip interface lists IPv4 details about interfaces, but none related to OSPF. One incorrect answer, show ip neighbor, is not a valid IOS command."
+                },
+                {
+                    question: "Routers R1, R2, and R3 are internal routers in areas 1, 2, and 3, respectively. Router R4 is an ABR connected to the backbone area (0) and to areas 1, 2, and 3. Which of the following answers describes the configuration on Router R4, which is different from the other three routers, that makes it an ABR?",
+                    choices: ["The ABR enable router subcommand", "The network router subcommands refer to a single non-backbone area.", "The network router subcommands refer to multiple areas, including the backbone.", "The router has an interface in area 0, whereas an OSPF neighbor's interface sits in a different area."],
+                    correct: ["The network router subcommands refer to multiple areas, including the backbone."],
+                    explanation: "An Area Border Router (ABR) in OSPF connects different areas to the backbone area (Area 0). The key difference in configuration for an ABR compared to other routers is that the network router subcommand within the OSPF configuration includes both the backbone area (Area 0) and other non-backbone areas. This allows the ABR to participate in routing within and between multiple areas, including the backbone."
+                },
+                {
+                    question: "An engineer connects to Router R1 and issues a show ip ospf neighbor command. The status of neighbor 2.2.2.2 lists FULL/BDR. What does the BDR mean?",
+                    choices: ["R1 is an Area Border Router.", "R1 is a backup designated router.", "Router 2.2.2.2 is an Area Border Router.", "Router 2.2.2.2 is a backup designated router."],
+                    correct: ["Router 2.2.2.2 is a backup designated router."],
+                    explanation: "R1 is an Area Border Router: While R1 could be an ABR (and likely is, given it's connected to multiple areas), the 'BDR' designation in the neighbor status refers specifically to its role on that particular segment, not its overall ABR status. R1 is a backup designated router: Although R1 could be the BDR on this segment, the output clearly indicates that 2.2.2.2 is the BDR, not R1. Router 2.2.2.2 is an Area Border Router: Router 2.2.2.2 could be an ABR, but the neighbor status 'FULL/BDR' tells us its role on this specific segment, which is backup DR. Router 2.2.2.2 is a backup designated router: This is the correct answer, as confirmed by the OSPF neighbor status."
+                },
+                {
+                    question: "An engineer migrates from a more traditional OSPFv2 configuration that uses network commands in OSPF configuration mode to instead use OSPFv2 interface configuration. Which of the following commands configures the area number assigned to an interface in this net configuration?",
+                    choices: ["The area command in interface configuration mode", "The ip ospf command in interface configuration mode", "The router ospf command in interface configuration mode", "the network command in interface configuration mode"],
+                    correct: ["The ip ospf command in interface configuration mode"],
+                    explanation: "With OSPFv2 interface configuration mode, the configuration looks just like the traditional configuration, with a couple of exceptions. The network router subcommand is no longer required. Instead, each interface on which OSPF should be enabled is configured with an ip ospf process-id area area-id interface subcommand. This command refers to the OSPF routing process that should be enabled on the interface and specifies the OSPFv2 area."
+                },
+                {
+                    question: "Which of the following configuration settings on a router does not influence which IPv4 router choose to add to its IPv4 routing table when using OSPFv2?",
+                    choices: ["auto-cost reference-bandwidth", "delay", "bandwidth", "ip ospf cost"],
+                    correct: ["delay"],
+                    explanation: "SPF calculates the cost of a route as the sum of the OSPF interface costs for all outgoing interfaces in the route. The interface cost can be set directly (ip ospf cost), or IOS uses a default based on the reference bandwidth and the interface bandwidth. Of the listed answers, delay is the only setting that does not influence OSPFv2 metric calculations."
+                },
+                {
+                    question: "Two routers using OSPFv2 have become neighbors and exchanged all LSAs. As a result, Router R1 now lists some OSPF-learned routes in its routing table. Which of the following best describes how R1 uses those recently learned LSAs to choose which IP routes to add to its IP routing table?",
+                    choices: ["Each LSA lists a route to be copied to the routing table", "Some LSAs list a route that can be copied to the routing table", "Run some SPF math against the LSAs to calculate the routes.", "R1 does not use the LSAs at all when choosing what routes to add"],
+                    correct: ["Run some SPF math against the LSAs to calculate the routes."],
+                    explanation: "LSAs contain topology information that is useful in calculating routes, but the LSAs do not directly list the route that a router should add to its routing table. In this case, R1 would run a calculation called the Shortest Path First (SPF) algorithm, against the LSAs, to determine what IP routes to add to the IP routing table."
+                },
+                {
+                    question: "A PC connects to a LAN and uses DHCP to lease an IP address for the first time. Of the usual four DHCP messages that flow between the PC and the DHCP server, which ones do the client send? (Choose two answers.)",
+                    choices: ["Acknowledgment", "Discover", "Offer", "Request"],
+                    correct: ["Discover", "Request"],
+                    explanation: "The client sends a Discover message, with the server returning an Offer message. The client then sends a Request, with the server sending back the IP address in the Acknowledgment message."
+                },
+                {
+                    question: "An enterprise puts the DHCP and DNS servers on VLAN 10/subnet 10 in Atlanta, using IP address 10.1.10.1 for the DHCP server and 10.1.10.2 for the DNS server. A remote router sits in Boston, with devices on the Boston LAN using the DHCP and DNS servers in Atlanta. Which of the following needs to be configured in the routers in this enterprise to support DHCP and DNS?",
+                    choices: ["The ip helper-address 10.1.10.1 command in the Atlanta router", "The ip helper-address 10.1.10.2 command in the Boston router", "The ip name-server 10.1.10.2 command in the Atlanta router", "The ip dhcp-server 10.1.10.1 command in the Boston router", "None of the other answers are correct"],
+                    correct: ["None of the other answers are correct"],
+                    explanation: "Of the commands in the answers, three list syntactically correct commands but one does not: ip dhcp-server 10.1.10.1. The answer with this command is incorrect. The ip helper-address 10.1.10.1 command is indeed needed as an interface subcommand, but only on remote routers like the Boston router. This command is not needed for the DNS server, so while the ip helper-address 10.1.10.2 command would be accepted, it does not help DNS or DHCP work. Finally, the ip name-server 10.1.10.2 command on the Atlanta router works, but it simply lets users of the Atlanta router CLI make use of the DNS server; it has no effect on user DNS traffic. The Boston router would need an ip helper-address 10.1.10.1 command, so that the Boston router could forward DHCP requests to the DHCP server in Atlanta."
+                },
+                {
+                    question: "Fred decides to migrate from an old DHCP server platform to use a Cisco router at the headquarters building. This DHCP server, created with configuration in IOS on a Cisco router, supports 200 remote subnets. Which of the following settings are made outside of a per-subnet pool of addresses?",
+                    choices: ["Client IP address", "Addresses in that subnet excluded from being leased by the server", "Default router", "DNS server", "Length of address lease"],
+                    correct: ["Addresses in that subnet excluded from being leased by the server"],
+                    explanation: "The configuration puts the per-client settings in a DHCP pool: client IP address, mask, default router, and DNS server IP addresses. The pool also lists the length of time for which the client can keep the lease for the address. Only the exclude list (ip dhcp exclude-address) sits outside the DHCP pool."
+                },
+                {
+                    question: "PC1, a new PC, just booted for the first time when connected to an enterprise network. PC1 used DHCP to lease IP address 10.1.1.1, learning mask 255.255.255.0, DNS server 10.9.9.9, and default gateway 10.1.1.2, with a lease time of 7 days. Assume that the PC has sent nothing else over the network because the DHCP process completed. The user then opens a web browser and types www.ciscopress.com. Which of the following actions happens next?",
+                    choices: ["PC1 sends an ARP request to find the web server’s MAC address.", "PC1 sends an ARP request to find the default gateway’s (10.1.1.2) MAC address.", "PC1 sends a DNS request about www.ciscopress.com to the DNS server (10.9.9.9).", "PC1 sends an IP packet to the www.ciscopress.com web server IP address."],
+                    correct: ["PC1 sends an ARP request to find the default gateway’s (10.1.1.2) MAC address."],
+                    explanation: "If a host does not yet have an IPv4 address assigned to it, the first action should be to try to lease an address with DHCP. The question begins as if that process had completed, but also that nothing else had happened on the network. That statement is meant to say that no ARPs had flowed, no DNS messages had flowed, and certainly no user messages. When the user types www.ciscopress.com into his browser window, PC1 needs to resolve the name into its IPv4 address. However, the DNS, 10.9.9.9, is on a different subnet than PC1. PC1 does not learn an ARP entry for the default router during the DHCP process. (Remember, all those DHCP messages sent by the DHCP client are not sent to the router’s MAC address.) So, although PC1’s next primary action is to resolve the name www.ciscopress.com to learn its IP address, the literal next message sent by PC1 is an ARP request. As a result, PC1 learns R1’s MAC address, and can then forward the DNS request to R1. Of the incorrect answers, after the ARP request to find the default router’s MAC address, PC1 will send a DNS request, and then send an IP packet to the server’s IP address. And if the server just happens to be in the same subnet as PC1, PC1 would also ARP to find the web server’s IP address."
+                },
+                {
+                    question: "A packet is sent to a destination address. That single packet is routed through the network to the final router, which then sends the packet to all hosts connected to that one subnet. Which of the following IP address types was used as the destination IP address?",
+                    choices: ["A unicast address", "A network broadcast address", "A subnet broadcast address", "A multicast address"],
+                    correct: ["A subnet broadcast address"],
+                    explanation: "By definition, a subnet broadcast (a packet sent to a subnet broadcast address), also called a directed broadcast, is routed like any other packet until it arrives at a router connected to that subnet. For that last forwarding step, the router encapsulates the IP packet in an Ethernet broadcast frame (destination MAC address FFFF.FFFF.FFFF), so that all hosts in the destination subnet receive a copy. A unicast packet would not be forwarded as a data link broadcast at the last step. A network broadcast would be replicated by different routers as needed so that it was delivered to all subnets in the classful network. A multicast packet would be delivered to a subset of subnets, depending on which subnets had hosts that had formerly asked to receive packets sent to that particular multicast address."
+                },
+                {
+                    question: "A packet is sent to a destination address. That single packet is replicated by a few routers based on the routers’ knowledge of hosts that had earlier registered to receive packets sent to that destination address. The routers do not forward copies of the packet onto subnets where no hosts have registered, and do forward copies of the packet onto subnets where at least one host has registered to receive those packets. Which of the following IP address types was used as the destination IP address?",
+                    choices: ["A unicast address", "A network broadcast address", "A subnet broadcast address", "A multicast address"],
+                    correct: ["A multicast address"],
+                    explanation: "By definition, a multicast IP packet (a packet sent to a Class D IP multicast address) is copied as necessary by routers to make extra copies and forwarded to multiple routers as needed, but not all. The logic revolves around prior knowledge of a host registration process by which hosts declare their interest in receiving packets sent to a particular multicast IP address. Routers exchange this information, so that when a new multicast packet arrives, the routers know where to send copies of that particular multicast packet and where to not bother to send the packet (because no hosts in that part of the network registered to receive a copy). A unicast packet would not be forwarded as a data link broadcast at the last step. A network broadcast would be replicated by different routers as needed so that it was delivered to all subnets in the classful network. A subnet broadcast would be routed as a single packet to the final router in the path. That router would then forward the IP packet as a LAN broadcast so that all hosts in that subnet would receive a copy."
+                },
+                {
+                    question: "What does the command ip helper-address server-ip do?",
+                    choices: ["Identifies the DHCP server by its IP address", "Requests that the DHCP server help users obtain IP addresses", "Provides an alternate route to the DHCP server", "Tells users where to find information about the DHCP server"],
+                    correct: ["Identifies the DHCP server by its IP address"],
+                    explanation: "The command ip helper-address server-ip requests that the DHCP server help users obtain IP addresses. It essentially acts as a DHCP relay, forwarding DHCP broadcast messages from a local network to a designated DHCP server on a different network."
+                },
+                {
+                    question: "Which of the following RSTP port states have the same name and purpose as a port state in traditional 802.1D STP? (Choose two answers.)",
+                    choices: ["Blocking", "Forwarding", "Listening", "Learning", "Discarding"],
+                    correct: ["Forwarding", "Learning"],
+                    explanation: "RSTP uses port state forwarding, learning, and discarding. Forwarding and learning perform the same functions as the port states used by traditional STP."
+                },
+                {
+                    question: "RSTP adds some concepts to STP that enable ports to be used for a role if another port on the same switch fails. Which of the following statements correctly describe a port role that is waiting to take over for another port role? (Choose two answers.)",
+                    choices: ["An alternate port waits to become a root port.", "A backup port waits to become a root port", "An alternate port waits to become a designated port.", "A backup port waits to become a designated port."],
+                    correct: ["An alternate port waits to become a root port.", "A backup port waits to become a designated port."],
+                    explanation: "With RSTP, an alternate port is an alternate to the root port when a switch’s root port fails. A backup port takes over for a designated port if the designated port fails."
+                },
+                {
+                    question: "What STP feature causes an interface to be placed in the forwarding state as soon as the interface is physically active?",
+                    choices: ["STP", "EtherChannel", "Root Guard", "PortFast"],
+                    correct: ["PortFast"],
+                    explanation: "The PortFast feature allows STP to move a port from blocking to forwarding without going through the interim listening and learning states. STP allows this exception when the link is known to have no switch on the other end of the link, removing the risk of a switching loop. BPDU Guard is a common feature to use at the same time as PortFast because it watches for incoming bridge protocol data units (BPDU), which should not happen on an access port, and prevents the loops from a rogue switch by disabling the port."
+                },
+                {
+                    question: "On a 2960 switch, which of the following commands change the value of the bridge ID? (Choose two answers.)",
+                    choices: ["spanning-tree bridge-id value", "spanning-tree vlan vlan-number root {primary | secondary}", "spanning-tree vlan vlan-number priority value", "set spanning-tree priority value"],
+                    correct: ["spanning-tree vlan vlan-number priority value", "spanning-tree vlan vlan-number root {primary | secondary}"],
+                    explanation: "spanning-tree vlan vlan-number priority value: This command directly modifies the bridge priority for a specific VLAN. By changing the priority, you are influencing the bridge ID, as the bridge ID is comprised of priority and the switch's MAC address. spanning-tree vlan vlan-number root {primary | secondary}: While this command doesn't directly modify the bridge ID, it sets the switch as either the primary or secondary root bridge for the specified VLAN. Changing the root bridge status can effectively change the overall topology and how the bridge ID affects the network."
+                },
+                {
+                    question: "What are the steps which must be completed in order to enable inter-VLAN routing using router-on-a-stick?",
+                    choices: ["Configure the physical interfaces on the router and enable a routing protocol.", "Create the VLANs on the router and define the port membership assignments on the switch.", "Create the VLANs on the switch to include port membership assignment and enable a routing protocol on the router.", "Create the VLANs on the switch to include port membership assignment and configure subinterfaces on the router matching the VLANs."],
+                    correct: ["Create the VLANs on the switch to include port membership assignment and configure subinterfaces on the router matching the VLANs."],
+                    explanation: "For router-on-a-stick inter-VLAN routing, you must first create the VLANs on the switch and assign ports to them. Then, you configure a single physical interface on the router to have multiple logical subinterfaces, one for each VLAN, and a trunk link must exist between the router and switch."
+                },
+                {
+                    question: "Refer to the exhibit. All devices are configured as shown in the exhibit. PC2 can successfully ping the F0/0 interface on R1. PC2 cannot ping PC1. What might be the reason for this failure?",
+                    image: "1.jpg",
+                    choices: ["PC1 and PC3 are not in the same VLAN.", "The PC3 network address configuration is incorrect.", "The S1 interface F0/11 should be assigned to VLAN30.", "The F0/0 and F0/1 interfaces on R1 must be configured as trunks."],
+                    correct: ["The PC3 network address configuration is incorrect."],
+                    explanation: "Based on the problem description and a standard network setup, the most likely cause of a ping failure between two PCs in different subnets (PC1 and PC3) is an incorrect network address configuration on one of the devices, preventing it from reaching its default gateway or the destination network."
+                },
+                {
+                    question: "Refer to the exhibit. R1 is routing between networks 192.168.10.0/28 and 192.168.30.0/28. PC1 can ping R1 interface F0/1, but cannot ping PC3. What is causing this failure?",
+                    image: "2.jpg",
+                    choices: ["PC1 and PC3 are not in the same VLAN.", "The PC3 network address configuration is incorrect.", "The S1 interface F0/11 should be assigned to VLAN30.", "The F0/0 and F0/1 interfaces on R1 must be configured as trunks."],
+                    correct: ["The PC3 network address configuration is incorrect."],
+                    explanation: "Based on the problem description and a standard network setup, the most likely cause of a ping failure between two PCs in different subnets (PC1 and PC3) is an incorrect network address configuration on one of the devices, preventing it from reaching its default gateway or the destination network."
+                },
+                {
+                    question: "What is important to consider while configuring the subinterfaces of a router when implementing inter-VLAN routing?",
+                    choices: ["The physical interface must have an IP address configured", "The subinterface numbers must match the VLAN ID number.", "The no shutdown command must be given on each subinterface", "The IP address of each subinterface must be the default gateway address for each VLAN subnet."],
+                    correct: ["The IP address of each subinterface must be the default gateway address for each VLAN subnet."],
+                    explanation: "A host must have a default gateway configured. Hosts on VLANs must have their default gateway configured on a router subinterface to provide inter-VLAN routing services."
+                },
+                {
+                    question: "Which statement is true about ARP when inter-VLAN routing is being used on the network?",
+                    choices: ["When router-on-a-stick inter-VLAN routing is in use, each subinterface has a separate MAC address to send in response to ARP requests.", "When VLANs are in use, the switch responds to ARP requests with the MAC address of the port to which the PC is connected", "When router-on-a-stick inter-VLAN routing is in use, the router returns the MAC address of the physical interface in response to ARP requests.", "When traditional inter-VLAN routing is in use, devices on all VLANs use the same physical router interface as their source of proxy ARP responses."],
+                    correct: ["When router-on-a-stick inter-VLAN routing is in use, the router returns the MAC address of the physical interface in response to ARP requests."],
+                    explanation: "With a router-on-a-stick configuration, the router's single physical interface acts as the default gateway for all connected VLANs. It uses the same MAC address for all of its subinterfaces when responding to ARP requests from devices on different VLANs, identifying itself as the next hop for inter-VLAN traffic."
+                },
+                {
+                    question: "In which situation could individual router physical interfaces be used for InterVLAN routing, instead of a router-on-a-stick configuration?",
+                    choices: ["a network with more than 100 subnetworks", "a network with a limited number of VLANs", "a network with experienced support personnel", "a network using a router with one LAN interface"],
+                    correct: ["a network with a limited number of VLANs"],
+                    explanation: "Using separate physical interfaces for each VLAN is a valid but less scalable approach to inter-VLAN routing. This method is practical only in networks with a small number of VLANs, as it consumes a dedicated router port for each VLAN. The router-on-a-stick model is more common for larger networks because it uses a single physical port to route traffic for multiple VLANs."
+                },
+                {
+                    question: "In a lab test environment, a router has learned about network 172.16.1.0 through four different dynamic routing processes. Which route will be used to reach this network?",
+                    choices: ["D 172.16.1.0/24 [90/2195456] via 192.168.200.1, 00:00:09, Serial0/0/0", "O 172.16.1.0/24 [110/1012] via 192.168.200.1, 00:00:22, Serial0/0/0", "R 172.16.1.0/24 [120/1] via 192.168.200.1, 00:00:17, Serial0/0/0", "I 172.16.1.0/24 [100/1192] via 192.168.200.1, 00:00:09, Serial0/0/0"],
+                    correct: ["D 172.16.1.0/24 [90/2195456] via 192.168.200.1, 00:00:09, Serial0/0/0"],
+                    explanation: "Cisco routers use Administrative Distance (AD) to determine the best route when a destination is learned via multiple routing protocols. The route with the lowest AD is preferred. D (EIGRP) has an AD of 90, O (OSPF) has an AD of 110, I (IS-IS) has an AD of 115, and R (RIP) has an AD of 120. Therefore, the EIGRP route with the lowest AD of 90 will be chosen."
+                },
+                {
+                    question: "Which statement is true about the metrics used by routing protocols?",
+                    choices: ["A metric is a value used by a particular routing protocol to compare paths to remote networks.", "A common metric is used by all routing protocols.", "The metric with the highest value is installed in the routing table.", "The router may use only one parameter at a time to calculate the metric"],
+                    correct: ["A metric is a value used by a particular routing protocol to compare paths to remote networks."],
+                    explanation: "A metric is a value used by a routing protocol to determine the best path to a destination network. Different routing protocols use different metrics (e.g., hop count for RIP, cost for OSPF, bandwidth/delay for EIGRP). The route with the best metric (often the lowest, but not always) is installed in the routing table."
+                },
+                {
+                    question: "Examine the following show command output on a router configured for dynamic NAT. Users are complaining about not being able to reach the Internet. Which of the following is the most likely cause?",
+                    image: "3.png",
+                    choices: ["The problem is not related to NAT, based on the information in the command output.", "The NAT pool does not have enough entries to satisfy all requests.", "Standard ACL 1 cannot be used; an extended ACL must be used.", "The command output does not supply enough information to identify the problem."],
+                    correct: ["The NAT pool does not have enough entries to satisfy all requests."],
+                    explanation: "The last line mentions that the pool has seven addresses, with all seven allocated, with the misses counter close to 1000—meaning that close to 1000 new flows were rejected because of insufficient space in the NAT pool."
+                },
+                {
+                    question: "With static NAT, performing translation for inside addresses only, what causes NAT table entries to be created?",
+                    choices: ["The first packet from the inside network to the outside network", "The first packet from the outside network to the inside network", "Configuration using the ip nat inside source command", "Configuration using the ip nat outside source command"],
+                    correct: ["Configuration using the ip nat inside source command"],
+                    explanation: "With static NAT, the entries are statically configured. Because the question mentions translation for inside addresses, the inside keyword is needed in the command."
+                },
+                {
+                    question: "With dynamic NAT, performing translation for inside addresses only, what causes NAT table entries to be created?",
+                    choices: ["The first packet from the inside network to the outside network", "The first packet from the outside network to the inside network", "Configuration using the ip nat inside source command", "Configuration using the ip nat outside source command"],
+                    correct: ["The first packet from the inside network to the outside network"],
+                    explanation: "With dynamic NAT, the entries are created as a result of the first packet flow from the inside network."
+                },
+                {
+                    question: "NAT has been configured to translate source addresses of packets for the inside part of the network, but only for some hosts as identified by an access control list. Which of the following commands indirectly identifies the hosts?",
+                    choices: ["ip nat inside source list 1 pool barney", "ip nat pool barney 200.1.1.1 200.1.1.254 netmask 255.255.255.0", "ip nat inside", "ip nat inside 200.1.1.1 200.1.1.2"],
+                    correct: ["ip nat inside source list 1 pool barney"],
+                    explanation: "The list 1 parameter references an IP ACL, which matches packets, identifying the inside local addresses."
+                },
+                {
+                    question: "What level of logging to the console is the default for a Cisco device?",
+                    choices: ["Informational", "Errors", "Warnings", "Debugging"],
+                    correct: ["Debugging"],
+                    explanation: "By default, all message levels are logged to the console on a Cisco device. To do so, IOS uses logging level 7 (debugging), which causes IOS to send severity level 7, and levels below 7, to the console. All the incorrect answers list levels below level 7."
+                },
+                {
+                    question: "Which syslog severity level is considered the most severe and results in the system being considered unusable?",
+                    choices: ["Error", "Emergency", "Alert", "Critical"],
+                    correct: ["Emergency"],
+                    explanation: "Syslog is a standard for logging messages and events on network devices. It uses severity levels to indicate the severity of the message or event being logged. The syslog severity levels range from 0 (Emergency) to 7 (Debug). Among these severity levels, Emergency (severity level 0) is considered the most severe. Messages logged at this level indicate a catastrophic system failure or complete system shutdown, and the system is considered unusable. This severity level should be reserved for only the most severe and critical events that require immediate attention. Therefore, the syslog severity level that is considered the most severe and results in the system being considered unusable is Emergency (severity level 0)."
+                },
+                {
+                    question: "Which statement describes a syslog message severity level?",
+                    choices: ["A syslog alarm with a severity level of 7 indicates an emergency situation that can render the system unusable.", "A syslog alarm at the severity level 4 and higher is sent to an external syslog server by default.", "A severity level 7 message is only accessible through the terminal line.", "Severity level 0 is the most critical severity level."],
+                    correct: ["Severity level 0 is the most critical severity level."],
+                    explanation: "The syslog severity levels increase in severity as the level number gets smaller. Level 0 is the highest severity level and indicates an emergency situation that can render a system unusable. Syslog severity level 7 is used for debugging messages."
+                },
+                {
+                    question: "What are the most common syslog messages?",
+                    choices: ["Error messages about hardware or software malfunctions", "Link up and link down messages", "Output messages that are generated from debug output", "Messages that occur when a packet matches a parameter condition in an access control list"],
+                    correct: ["Link up and link down messages"],
+                    explanation: "These are all syslog messages, but the most common ones are link up and link down messages."
+                },
+                {
+                    question: "Which syslog logging severity level indicates that a device is unusable?",
+                    choices: ["Level 0-Emergency", "Level 1-Alert", "Level 2-Critical", "Level 3-Error"],
+                    correct: ["Level 0-Emergency"],
+                    explanation: "The smaller the level numbers, the more critical the alarms. Emergency-Level 0 messages indicate that the system is unusable. This would be an event that has halted the system. Alert-Level 1 messages indicate that immediate action is needed, as in the case of a failed connection to the ISP. Critical-Level 2 messages indicate a critical condition, such as the failure of a backup connection to the ISP. Error-Level 3 messages indicate error conditions, such as an interface being down"
+                },
+                {
+                    question: "Which protocol or service allows network administrators to receive system messages that are provided by network devices?",
+                    choices: ["NTP", "NetFlow", "SNMP", "Syslog"],
+                    correct: ["Syslog"],
+                    explanation: "Cisco developed NetFlow for the purpose of gathering statistics on packets flowing through Cisco routers and multilayer switches. SNMP can be used to collect and store information about a device. Syslog is used to access and store system messages."
+                },
+                {
+                    question: "Which syslog message type is accessible only to an administrator via the Cisco CLI?",
+                    choices: ["Alerts", "Debugging", "Emergency", "Errors"],
+                    correct: ["Debugging"],
+                    explanation: "Syslog messages can be sent to the logging buffer, the console line, the terminal line, or a syslog server. However, debug-level messages are only forwarded to the internal buffer and are accessible only through the Cisco CLI."
+                },
+                {
+                    question: "Which default destination do Cisco routers and switches use to send Syslog messages?",
+                    choices: ["Console", "Nearest syslog server", "NVRAM", "RAM"],
+                    correct: ["Console"],
+                    explanation: "The console receives all syslog messages by default. Syslog messages for Cisco routers and switches can be sent to memory, the console, a tty line, or a syslog server."
+                },
+                {
+                    question: "What is the result of configuring the logging trap 4 global configuration command?",
+                    choices: ["The syslog client sends to the syslog server any event message that has a severity level of 4 or lower.", "The syslog client sends to the syslog server event messages with an identification trap level of only 4.", "The syslog client sends to the syslog server any event message that has a severity level of 4 or higher.", "After four events, the syslog client sends an event message to the syslog server."],
+                    correct: ["The syslog client sends to the syslog server any event message that has a severity level of 4 or lower."],
+                    explanation: "The logging trap level allows a network administrator to limit event messages that are being sent to a syslog server based on severity."
+                },
+                {
+                    question: "A switch’s port Gi0/1 has been correctly enabled with port security. The configuration sets the violation mode to restrict. A frame that violates the port security policy enters the interface, followed by a frame that does not. Which of the following answers correctly describe what happens in this scenario? (Choose two answers.)",
+                    choices: ["The switch puts the interface into an err-disabled state when the first frame arrives.", "The switch generates syslog messages about the violating traffic for the first frame.", "The switch increments the violation counter for Gi0/1 by 1.", "The switch discards both the first and second frame."],
+                    correct: ["The switch generates syslog messages about the violating traffic for the first frame.", "The switch increments the violation counter for Gi0/1 by 1."],
+                    explanation: "First, about the two incorrect answers: In restrict mode, the arrival of a frame that violates the port security policy does not cause the switch to put the interface into err-disabled state. It does cause the switch to discard any frames that violate the policy, but it leaves the interface up and does not discard frames that do not violate the security policy, like the second frame that arrives. Regarding the two correct answers, a port in port security restrict does cause the switch to issue log messages for a violating frame, send SNMP traps about that same event (if SNMP is configured), and increment the counter of violating frames."
+                },
+                {
+                    question: "Which of the following attributes do QoS tools manage? (Choose three answers.)",
+                    choices: ["Bandwidth", "Delay", "Load", "MTU", "Loss"],
+                    correct: ["Bandwidth", "Delay", "Loss"],
+                    explanation: "QoS tools manage bandwidth, delay, jitter, and loss."
+                },
+                {
+                    question: "How does QoS improve the effectiveness of teleworking?",
+                    choices: ["It provides wireless data transmission over large urban areas.", "It provides high speed connections over copper wires.", "It provides better service for VoIP and video conferencing applications.", "It provides authentication, accounting, and link management features for ISPs."],
+                    correct: ["It provides better service for VoIP and video conferencing applications."],
+                    explanation: "QoS prioritizes certain types of network traffic, such as voice and video, over less time-sensitive traffic like web browsing or file transfers. This ensures that real-time applications like VoIP and video conferencing have the bandwidth and low latency they need to function smoothly, which is critical for teleworking."
+                }
+            ];
+
+           const questionsPerPage = 5;
+            let shuffledQuizData = [];
+            let currentPage = 0;
+            let score = 0;
+            let answered = false;
+
+            // --- Utility Functions ---
+
+            // Fisher-Yates shuffle algorithm
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            function initQuiz() {
+                // Shuffle questions at the start
+                shuffledQuizData = shuffleArray([...quizData]);
+                currentPage = 0;
+                loadPage();
+            }
+
+            function loadPage() {
+                // Clear the answered state for the new page of questions
+                answered = false;
+
+                const quizContainer = document.getElementById('quiz-container');
+                const explanationContainer = document.getElementById('explanation-container');
+                const nextButton = document.getElementById('next-button');
+                const prevButton = document.getElementById('prev-button');
+
+                // Clear previous content
+                quizContainer.innerHTML = '';
+                explanationContainer.classList.add('hidden');
+
+                // Determine which questions to display on the current page
+                const startIndex = currentPage * questionsPerPage;
+                const endIndex = startIndex + questionsPerPage;
+                const questionsOnPage = shuffledQuizData.slice(startIndex, endIndex);
+
+                // Update button states
+                prevButton.disabled = currentPage === 0;
+                nextButton.disabled = false;
+                nextButton.textContent = 'Next';
+                nextButton.onclick = checkAnswersOnPage;
+                
+                // Show "Show Score" button on the last page
+                if (endIndex >= shuffledQuizData.length) {
+                    nextButton.textContent = 'Show Score';
+                    nextButton.onclick = showFinalScore;
+                }
+
+                questionsOnPage.forEach((questionData, index) => {
+                    const globalQuestionIndex = startIndex + index;
+                    
+                    // Create question element
+                    const questionElement = document.createElement('div');
+                    questionElement.className = 'mb-8 p-4 bg-gray-50 rounded-lg shadow-sm';
+                    
+                    const questionTitle = document.createElement('h2');
+                    questionTitle.className = 'text-lg font-semibold mb-2 text-gray-800';
+                    questionTitle.textContent = `Q${globalQuestionIndex + 1}. ${questionData.question}`;
+                    questionElement.appendChild(questionTitle);
+
+                    // Add image if it exists
+                    if (questionData.image) {
+                        const imageElement = document.createElement('img');
+                        imageElement.src = questionData.image;
+                        imageElement.alt = "Question related image";
+                        imageElement.className = "my-4 rounded-lg shadow-md max-w-full h-auto";
+                        questionElement.appendChild(imageElement);
+                    }
+
+                    // Create choices container
+                    const choicesContainer = document.createElement('div');
+                    choicesContainer.className = 'flex flex-col space-y-2 mt-2';
+                    questionElement.appendChild(choicesContainer);
+
+                    // Shuffle choices for the current question
+                    const shuffledChoices = shuffleArray([...questionData.choices]);
+
+                    shuffledChoices.forEach(choice => {
+                        const isMultipleAnswer = questionData.correct.length > 1;
+                        const inputType = isMultipleAnswer ? 'checkbox' : 'radio';
+                        const inputName = isMultipleAnswer ? `q${globalQuestionIndex}` : `q${globalQuestionIndex}`;
+
+                        const label = document.createElement('label');
+                        label.className = `flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100`;
+                        label.innerHTML = `
+                            <input type="${inputType}" name="${inputName}" value="${choice}" data-question-index="${globalQuestionIndex}" class="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm font-normal text-gray-700">${choice}</span>
+                        `;
+                        choicesContainer.appendChild(label);
+                    });
+                    quizContainer.appendChild(questionElement);
+                });
+            }
+
+            function checkAnswersOnPage() {
+                if (answered) return;
+                answered = true;
+
+                const startIndex = currentPage * questionsPerPage;
+                const questionsOnPage = shuffledQuizData.slice(startIndex, startIndex + questionsPerPage);
+                
+                questionsOnPage.forEach((questionData, index) => {
+                    const globalQuestionIndex = startIndex + index;
+                    const choicesContainer = document.querySelector(`input[data-question-index="${globalQuestionIndex}"]`).closest('div.flex-col');
+                    const selectedInputs = choicesContainer.querySelectorAll('input[data-question-index="' + globalQuestionIndex + '"]:checked');
+                    
+                    let isCorrect = false;
+
+                    if (questionData.correct.length > 1) {
+                        // Logic for multiple-answer questions (checkboxes)
+                        const selectedAnswers = Array.from(selectedInputs).map(input => input.value);
+                        isCorrect = questionData.correct.length === selectedAnswers.length && questionData.correct.every(val => selectedAnswers.includes(val));
+                    } else {
+                        // Logic for single-answer questions (radio buttons)
+                        const selectedAnswer = selectedInputs.length > 0 ? selectedInputs[0].value : null;
+                        isCorrect = selectedAnswer === questionData.correct[0];
+                    }
+
+                    // Apply visual feedback
+                    choicesContainer.querySelectorAll('label').forEach(label => {
+                        const input = label.querySelector('input');
+                        const isCorrectChoice = questionData.correct.includes(input.value);
+
+                        // Add visual highlight for selected choices
+                        if (input.checked && !isCorrectChoice) {
+                            label.classList.add('wrong-answer');
+                        }
+                        
+                        // Always highlight the correct answer(s) in green
+                        if (isCorrectChoice) {
+                            label.classList.add('correct-answer');
+                        }
+
+                        // Disable inputs after answering
+                        input.disabled = true;
+                    });
+
+                    // Update score and display explanation if it's the first time
+                    if (isCorrect) {
+                        score++;
+                    }
+                });
+
+                document.getElementById('score').textContent = score;
+                document.getElementById('explanation-text').textContent = "You can now click 'Next' to move to the next page or 'Previous' to go back and review your answers.";
+                document.getElementById('explanation-container').classList.remove('hidden');
+
+                const nextButton = document.getElementById('next-button');
+                const prevButton = document.getElementById('prev-button');
+                
+                // Set up the next page navigation after checking answers
+                nextButton.onclick = () => {
+                    currentPage++;
+                    loadPage();
+                };
+                prevButton.onclick = () => {
+                    currentPage--;
+                    loadPage();
+                };
+            }
+
+            function showFinalScore() {
+                const quizContainer = document.getElementById('quiz-container');
+                const nextButton = document.getElementById('next-button');
+                const prevButton = document.getElementById('prev-button');
+                const explanationContainer = document.getElementById('explanation-container');
+                
+                // Hide explanation container before displaying final score
+                explanationContainer.classList.add('hidden');
+
+                quizContainer.innerHTML = `
+                    <h1 class="text-xl font-bold text-center text-gray-800 mb-4">Quiz Complete!</h1>
+                    <p class="text-base text-center text-gray-700">Your final score is <span class="font-bold text-blue-600">${score}</span> out of <span class="font-bold">${shuffledQuizData.length}</span>.</p>
+                `;
+                nextButton.remove();
+                prevButton.remove();
+            }
+
+            // Start the quiz
+            initQuiz();
+        });
+    </script>
+
+</body>
+</html>
