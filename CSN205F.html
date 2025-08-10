@@ -45,12 +45,6 @@
             <!-- Questions will be loaded here -->
         </div>
 
-        <!-- Explanation Section -->
-        <div id="explanation-container" class="mt-8 pt-4 border-t hidden">
-            <h2 class="text-base font-semibold text-gray-800 mb-2">Explanation</h3>
-            <p id="explanation-text" class="text-lg text-gray-700"></p>
-        </div>
-
         <!-- Navigation Buttons -->
         <div class="flex justify-between mt-8">
             <button id="prev-button" class="px-5 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -59,6 +53,14 @@
             <button id="next-button" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                 Next
             </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-sm text-gray-500">
+            <p>© <a href="https://github.com/cerealicious/" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               class="text-blue-600 hover:underline">cerealicious</a> | OPS245 Practice Test | Made for Educational Purposes</p>
         </div>
     </div>
 
@@ -349,18 +351,19 @@
             }
 
             function loadPage() {
+                // Scroll to the top of the page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
                 // Clear the answered state for the new page of questions
                 answered = false;
 
                 const quizContainer = document.getElementById('quiz-container');
-                const explanationContainer = document.getElementById('explanation-container');
                 const nextButton = document.getElementById('next-button');
                 const prevButton = document.getElementById('prev-button');
 
                 // Clear previous content
                 quizContainer.innerHTML = '';
-                explanationContainer.classList.add('hidden');
-
+                
                 // Determine which questions to display on the current page
                 const startIndex = currentPage * questionsPerPage;
                 const endIndex = startIndex + questionsPerPage;
@@ -369,13 +372,13 @@
                 // Update button states
                 prevButton.disabled = currentPage === 0;
                 nextButton.disabled = false;
-                nextButton.textContent = 'Next';
+                nextButton.textContent = 'Check Answers';
                 nextButton.onclick = checkAnswersOnPage;
                 
-                // Show "Show Score" button on the last page
+                // Show "Show Score" button on the last page after checking
                 if (endIndex >= shuffledQuizData.length) {
-                    nextButton.textContent = 'Show Score';
-                    nextButton.onclick = showFinalScore;
+                    // This button text will be set after the first check
+                    nextButton.onclick = checkAnswersOnPage;
                 }
 
                 questionsOnPage.forEach((questionData, index) => {
@@ -383,11 +386,12 @@
                     
                     // Create question element
                     const questionElement = document.createElement('div');
+                    questionElement.id = `question-${globalQuestionIndex}`;
                     questionElement.className = 'mb-8 p-4 bg-gray-50 rounded-lg shadow-sm';
                     
                     const questionTitle = document.createElement('h2');
-                    questionTitle.className = 'text-lg font-semibold mb-2 text-gray-800';
-                    questionTitle.textContent = `Q${globalQuestionIndex + 1}. ${questionData.question}`;
+                    questionTitle.className = 'text-base font-semibold mb-2 text-gray-800';
+                    questionTitle.textContent = `${globalQuestionIndex + 1}. ${questionData.question}`;
                     questionElement.appendChild(questionTitle);
 
                     // Add image if it exists
@@ -431,9 +435,30 @@
                 const startIndex = currentPage * questionsPerPage;
                 const questionsOnPage = shuffledQuizData.slice(startIndex, startIndex + questionsPerPage);
                 
+                // Re-calculate the score for the entire quiz to avoid issues with back-and-forth navigation
+                let newScore = 0;
+                shuffledQuizData.forEach((questionData, globalQuestionIndex) => {
+                    const selectedInputs = document.querySelectorAll(`input[data-question-index="${globalQuestionIndex}"]:checked`);
+                    
+                    let isCorrect = false;
+                    if (questionData.correct.length > 1) {
+                        const selectedAnswers = Array.from(selectedInputs).map(input => input.value);
+                        isCorrect = questionData.correct.length === selectedAnswers.length && questionData.correct.every(val => selectedAnswers.includes(val));
+                    } else {
+                        const selectedAnswer = selectedInputs.length > 0 ? selectedInputs[0].value : null;
+                        isCorrect = selectedAnswer === questionData.correct[0];
+                    }
+                    if (isCorrect) {
+                        newScore++;
+                    }
+                });
+                score = newScore;
+                document.getElementById('score').textContent = score;
+
                 questionsOnPage.forEach((questionData, index) => {
                     const globalQuestionIndex = startIndex + index;
-                    const choicesContainer = document.querySelector(`input[data-question-index="${globalQuestionIndex}"]`).closest('div.flex-col');
+                    const questionElement = document.getElementById(`question-${globalQuestionIndex}`);
+                    const choicesContainer = questionElement.querySelector('div.flex-col');
                     const selectedInputs = choicesContainer.querySelectorAll('input[data-question-index="' + globalQuestionIndex + '"]:checked');
                     
                     let isCorrect = false;
@@ -447,7 +472,7 @@
                         const selectedAnswer = selectedInputs.length > 0 ? selectedInputs[0].value : null;
                         isCorrect = selectedAnswer === questionData.correct[0];
                     }
-
+                    
                     // Apply visual feedback
                     choicesContainer.querySelectorAll('label').forEach(label => {
                         const input = label.querySelector('input');
@@ -467,24 +492,31 @@
                         input.disabled = true;
                     });
 
-                    // Update score and display explanation if it's the first time
-                    if (isCorrect) {
-                        score++;
-                    }
+                    // Append explanation for the current question directly below it
+                    const explanationElement = document.createElement('div');
+                    explanationElement.className = 'mt-4 pt-4 border-t';
+                    explanationElement.innerHTML = `
+                        <h4 class="text-base font-semibold text-gray-800 mb-2">Explanation:</h4>
+                        <p class="text-sm text-gray-700">${questionData.explanation}</p>
+                    `;
+                    questionElement.appendChild(explanationElement);
                 });
-
-                document.getElementById('score').textContent = score;
-                document.getElementById('explanation-text').textContent = "You can now click 'Next' to move to the next page or 'Previous' to go back and review your answers.";
-                document.getElementById('explanation-container').classList.remove('hidden');
-
+                
+                // Set up the next/prev buttons for navigation
                 const nextButton = document.getElementById('next-button');
                 const prevButton = document.getElementById('prev-button');
-                
-                // Set up the next page navigation after checking answers
-                nextButton.onclick = () => {
-                    currentPage++;
-                    loadPage();
-                };
+                const endIndex = startIndex + questionsPerPage;
+
+                if (endIndex >= shuffledQuizData.length) {
+                    nextButton.textContent = 'Show Final Score';
+                    nextButton.onclick = showFinalScore;
+                } else {
+                    nextButton.textContent = 'Next Page';
+                    nextButton.onclick = () => {
+                        currentPage++;
+                        loadPage();
+                    };
+                }
                 prevButton.onclick = () => {
                     currentPage--;
                     loadPage();
@@ -495,11 +527,7 @@
                 const quizContainer = document.getElementById('quiz-container');
                 const nextButton = document.getElementById('next-button');
                 const prevButton = document.getElementById('prev-button');
-                const explanationContainer = document.getElementById('explanation-container');
                 
-                // Hide explanation container before displaying final score
-                explanationContainer.classList.add('hidden');
-
                 quizContainer.innerHTML = `
                     <h1 class="text-xl font-bold text-center text-gray-800 mb-4">Quiz Complete!</h1>
                     <p class="text-base text-center text-gray-700">Your final score is <span class="font-bold text-blue-600">${score}</span> out of <span class="font-bold">${shuffledQuizData.length}</span>.</p>
@@ -514,4 +542,5 @@
     </script>
 
 </body>
+
 </html>
