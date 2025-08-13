@@ -188,7 +188,7 @@
                     image: "1.jpg",
                     choices: ["R1 interface F0/1 has not been configured for subinterface operation.", "S1 interface F0/6 needs to be configured for operation in VLAN10.", "S1 interface F0/8 is in the wrong VLAN.", "S1 port F0/6 is not in VLAN10."],
                     correct: ["S1 interface F0/8 is in the wrong VLAN."],
-                    explanation: "Based on the problem description and a standard network setup, the most likely cause of a ping failure between two PCs in different subnets (PC1 and PC3) is an incorrect network address configuration on one of the devices, preventing it from reaching its default gateway or the destination network."
+                    explanation: "The reason for the failure could be that S1 interface F0/8 is in the wrong VLAN. Since PC2 can successfully ping the F0/0 interface on R1, we can assume that the connection between R1 and S1 is functioning correctly. However, PC2 cannot ping PC1, which suggests that there may be an issue with the VLAN configuration. If S1 interface F0/8 is in the wrong VLAN, it would prevent PC2 from communicating with PC1."
                 },
                 {
                     question: "Refer to the exhibit. R1 is routing between networks 192.168.10.0/28 and 192.168.30.0/28. PC1 can ping R1 interface F0/1, but cannot ping PC3. What is causing this failure?",
@@ -544,5 +544,6 @@
 </body>
 
 </html>
+
 
 
